@@ -1,0 +1,30 @@
+{
+  "name": "Code Commit",
+  "image": "mcr.microsoft.com/devcontainers/python:3.11",
+  "features": {
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+  "customizations": {
+    "codespaces": {
+      "openFiles": [
+        "README.md"
+      ]
+    }
+  },
+  "postCreateCommand": "pip install -r requirements.txt",
+  "portsAttributes": {
+    "8080": {
+      "visibility": "public",
+      "onAutoStart": true
+    },
+    "8081": {
+      "visibility": "public", 
+      "onAutoStart": true
+    }
+  },
+  "updateContentCommand": {
+    "*": {
+      "refresh": true
+    }
+  }
+}

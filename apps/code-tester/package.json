@@ -1,0 +1,20 @@
+{
+  "name": "Code Commit - Code Tester",
+  "version": "1.0.0",
+  "description": "AI-powered test runner",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win"
+  },
+  "build": {
+    "appId": "com.agennext.codecommit.code-tester",
+    "productName": "Code Tester",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**/*"
+    ]
+  }
+}
