@@ -1,0 +1,26 @@
+# Agent Harness Dockerfile
+FROM golang:1.21-alpine AS builder
+
+WORKDIR /app
+
+RUN apk add --no-cache git
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+
+RUN CGO_ENABLED=0 GOOS=linux go build -o /agent-harness .
+
+FROM alpine:3.19
+
+RUN apk add --no-cache git curl ca-certificates
+
+WORKDIR /app
+
+COPY --from=builder /agent-harness .
+COPY deploy/.env.example .env
+
+EXPOSE 3000
+
+CMD ["./agent-harness", "serve"]
