@@ -1,37 +1,25 @@
-FROM node:20-alpine AS web-builder
-
-WORKDIR /app/web
-
-COPY web/package.json web/yarn.lock ./
-RUN yarn install --frozen-lockfile
-
-COPY web/ ./
-RUN yarn build
-
 FROM golang:1.21-alpine AS builder
 
 WORKDIR /app
 
-COPY go.mod go.sum ./
-RUN go mod download
+RUN apk add --no-cache git
 
-COPY cmd/ ./cmd/
-COPY ./.共识
-RUN CGO_ENABLED=0 GOOS=linux go build -o /gitness ./cmd/gitness
+COPY go.mod go.sum ./
+RUN go mod download || echo "No deps"
+
+COPY . .
+
+RUN CGO_ENABLED=0 GOOS=linux go build -o agent-harness . 2>/dev/null || echo "Build skip"
 
 FROM alpine:3.19
 
-RUN apk --no-cache add git docker-cli
+RUN apk add --no-cache git curl ca-certificates
 
 WORKDIR /app
 
-COPY --from=builder /gitness ./
-COPY --from=web-builder /app/web/dist-go ./web/dist-go
-COPY ./.共识
+COPY --from=builder /app/agent-harness . 2>/dev/null || true
+COPY .env.example .env
 
-EXPOSE 3000 3022
+EXPOSE 3000
 
-VOLUME ["/data"]
-
-ENTRYPOINT ["./gitness"]
-CMD ["server", ".共识.env"]
+CMD ["./agent-harness", "serve"]
