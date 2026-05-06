@@ -1,0 +1,31 @@
+name: Deploy to Harbor (Podman)
+
+on:
+  push:
+    branches: [main]
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  deploy-harbor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Podman
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y podman
+          
+      - name: Build image
+        run: |
+          podman build -t harbor.autonomyx.io/agent-harness:latest .
+          
+      - name: Login to Harbor
+        run: |
+          echo ${{ secrets.HARBOR_PASSWORD }} | podman login harbor.autonomyx.io -u ${{ secrets.HARBOR_USERNAME }} --password-stdin
+          
+      - name: Push to Harbor
+        run: |
+          podman push harbor.autonomyx.io/agent-harness:latest
