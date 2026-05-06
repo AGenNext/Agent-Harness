@@ -6,6 +6,17 @@ on:
   release:
     types: [published]
   workflow_dispatch:
+    inputs:
+      harbor_url:
+        description: 'Harbor URL'
+        required: true
+        default: 'harbor.autonomyx.io'
+      harbor_username:
+        description: 'Harbor Username'
+        required: true
+      harbor_password:
+        description: 'Harbor Password'
+        required: true
 
 jobs:
   deploy-harbor:
@@ -20,12 +31,12 @@ jobs:
           
       - name: Build image
         run: |
-          podman build -t harbor.autonomyx.io/agent-harness:latest .
+          podman build -t ${{ github.event.inputs.harbor_url || 'harbor.autonomyx.io' }}/agent-harness:latest .
           
       - name: Login to Harbor
         run: |
-          echo ${{ secrets.HARBOR_PASSWORD }} | podman login harbor.autonomyx.io -u ${{ secrets.HARBOR_USERNAME }} --password-stdin
+          echo ${{ github.event.inputs.harbor_password }} | podman login ${{ github.event.inputs.harbor_url || 'harbor.autonomyx.io' }} -u ${{ github.event.inputs.harbor_username }} --password-stdin
           
       - name: Push to Harbor
         run: |
-          podman push harbor.autonomyx.io/agent-harness:latest
+          podman push ${{ github.event.inputs.harbor_url || 'harbor.autonomyx.io' }}/agent-harness:latest
